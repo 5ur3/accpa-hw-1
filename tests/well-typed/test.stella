@@ -6,8 +6,8 @@ fn a(x : fn(Nat) -> Nat) -> (fn(Nat) -> Nat) {
     };
 }
 
-fn main(f : fn(Nat) -> Nat) -> (fn(Nat) -> (fn(Nat) -> Nat)) {
-    return fn (n : Nat) {
+fn main(f : fn(Nat) -> Nat) -> (fn(fn(Nat) -> Nat) -> (fn(Nat) -> Nat)) {
+    return fn (n : fn(Nat) -> Nat) {
         return fn (m : Nat) {
             return 44;
         };

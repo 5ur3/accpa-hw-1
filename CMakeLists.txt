@@ -21,6 +21,13 @@ set (SRCS
   src/Eval.cpp
   src/TypeCheck.h
   src/TypeCheck.cpp
+  src/VisitTypeCheckUtils/StellaType.h
+  src/VisitTypeCheckUtils/StellaType.cpp
+  src/VisitTypeCheckUtils/StellaExpression.h
+  src/VisitTypeCheckUtils/StellaExpressions/StellaConstIntExpression.cpp
+  src/VisitTypeCheckUtils/StellaExpressions/StellaAbstractionExpression.cpp
+  src/VisitTypeCheckUtils/StellaFunction.h
+  src/VisitTypeCheckUtils/StellaFunction.cpp
   src/VisitTypeCheck.h
   src/VisitTypeCheck.cpp
 )
