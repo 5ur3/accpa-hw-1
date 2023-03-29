@@ -1,7 +1,9 @@
 #include "StellaFunction.h"
 #include <iostream>
 
-StellaFunction::StellaFunction(Stella::StellaIdent ident, std::map<Stella::StellaIdent, StellaType> context) {
+StellaFunction::StellaFunction(
+    Stella::StellaIdent ident,
+    std::map<Stella::StellaIdent, StellaType> context) {
   this->ident = ident;
   this->context = context;
 }
@@ -33,7 +35,9 @@ bool StellaFunction::isTypingCorrect() {
   if (!this->expression->isTypingCorrect()) {
     isCorrect = false;
   } else if (this->returnType != this->expression->getStellaType()) {
-    std::cout << "Type error: function return and function expression types are mismatched" << std::endl;
+    std::cout << "Type error: function return and function expression types "
+                 "are mismatched"
+              << std::endl;
     isCorrect = false;
   }
 

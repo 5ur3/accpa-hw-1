@@ -8,6 +8,4 @@ StellaType StellaConstBoolExpression::getStellaType() {
   return StellaType("bool");
 }
 
-bool StellaConstBoolExpression::isTypingCorrect() {
-  return true;
-}
+bool StellaConstBoolExpression::isTypingCorrect() { return true; }

@@ -1,8 +1,8 @@
 #ifndef STELLA_TYPE_HEADER
 #define STELLA_TYPE_HEADER
 
-#include <string>
 #include <deque>
+#include <string>
 #include <vector>
 
 class StellaType {

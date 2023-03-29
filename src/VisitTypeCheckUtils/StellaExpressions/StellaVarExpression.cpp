@@ -16,7 +16,8 @@ bool StellaVarExpression::isTypingCorrect() {
   bool isCorrect = this->context.count(this->ident);
 
   if (!isCorrect) {
-    std::cout << "Error: ident \"" + this->ident + "\" is not declared" << std::endl;
+    std::cout << "Error: ident \"" + this->ident + "\" is not declared"
+              << std::endl;
   }
 
   return isCorrect;
