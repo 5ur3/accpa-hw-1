@@ -1,0 +1,15 @@
+language core;
+
+fn f(x : Nat) -> Nat {
+    return x;
+}
+
+fn twice(f : fn(Nat) -> Nat) -> (fn(Nat) -> Nat) {
+  return fn(x : Nat) {
+    return f(f(x));
+  };
+}
+
+fn main(x : Nat) -> Nat {
+    return twice(f)(x);
+}
