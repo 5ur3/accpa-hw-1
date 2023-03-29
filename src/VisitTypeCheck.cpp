@@ -23,23 +23,25 @@ enum State {
   STATE_IDLE = 100
 };
 
+State state = STATE_IDLE;
+
+// Global context contains function signatures
 std::map<Stella::StellaIdent, StellaType> globalContext;
 StellaFunction *currentFunction = NULL;
 
+// This is used for debugging only
 std::map<Stella::StellaIdent, StellaFunction *> stellaFunctions;
-
-State state = STATE_IDLE;
 
 void verifyFunction(StellaFunction *function) {
   bool isCorrect = function->isTypingCorrect();
-  std::cout << "! " << function->ident << " correctness: " << isCorrect
-            << std::endl;
 
   if (!isCorrect) {
     exit(1);
   }
 }
 
+// Functions below are called directly from template visitor below
+// These functions control the program state and build typing trees
 void onFunction(Stella::StellaIdent ident) {
   if (currentFunction != NULL) {
     verifyFunction(currentFunction);
@@ -61,7 +63,7 @@ void onIdent(Stella::StellaIdent ident) {
     break;
   }
   case STATE_AWAITING_FUNCTION_PARAM_IDENT: {
-    currentFunction->setParamName(ident);
+    currentFunction->setParamIdent(ident);
     state = STATE_PARSING_FUNCTION_PARAM_TYPE;
     break;
   }
@@ -161,6 +163,7 @@ void onCondition() {
   state = STATE_AWAITING_EXPRESSION;
 }
 
+// Functions used to print function and expression signatures
 void print_indent(int level) {
   for (int i = 0; i < level; i++) {
     std::cout << "\t";
@@ -227,13 +230,14 @@ void print_expression(StellaExpression *expression, int level) {
 }
 
 void print_function(StellaFunction *function) {
-  std::cout << function->ident << "(" << function->paramName << ": "
+  std::cout << function->ident << "(" << function->paramIdent << ": "
             << function->paramType.type_string
             << "): " << function->returnType.type_string << std::endl;
 
   print_expression(function->expression, 1);
 }
 
+// This is called when visitor finishes reading a program
 void onEnd() {
   if (currentFunction != NULL) {
     verifyFunction(currentFunction);

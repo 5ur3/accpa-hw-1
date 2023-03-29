@@ -1,10 +1,11 @@
 #include "../StellaExpression.h"
+#include <iostream>
 
 StellaConditionExpression::StellaConditionExpression() {
   this->type = STELLA_EXPRESSION_TYPE_CONDITION;
 }
 StellaType StellaConditionExpression::getStellaType() {
-  if (!this->isParsed() || !this->isTypingCorrect()) {
+  if (!this->isParsed()) {
     return StellaType();
   }
 
@@ -14,14 +15,27 @@ bool StellaConditionExpression::isTypingCorrect() {
   if (!this->isParsed()) {
     return false;
   }
+
+  bool isCorrect = true;
   if (!this->condition->isTypingCorrect() ||
       !this->expression1->isTypingCorrect() ||
       !this->expression2->isTypingCorrect()) {
-    return false;
+    isCorrect = false;
+  } else if (condition->getStellaType() != StellaType("bool")) {
+    std::cout << "Type error: condition statement is not bool" << std::endl;
+    isCorrect = false;
+  } else if (expression1->getStellaType() != expression2->getStellaType()) {
+    std::cout << "Type error: unable to infer type of condition expression "
+                 "(condition expression types are mismatched)"
+              << std::endl;
+    isCorrect = false;
   }
 
-  return condition->getStellaType() == StellaType("bool") &&
-         expression1->getStellaType() == expression2->getStellaType();
+  if (!isCorrect) {
+    std::cout << "\tin condition" << std::endl;
+  }
+
+  return isCorrect;
 }
 void StellaConditionExpression::proxyIdent(Stella::StellaIdent ident) {
   if (!this->condition->isParsed()) {

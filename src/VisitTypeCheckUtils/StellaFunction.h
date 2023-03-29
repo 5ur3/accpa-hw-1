@@ -9,7 +9,7 @@
 class StellaFunction {
 public:
   Stella::StellaIdent ident;
-  Stella::StellaIdent paramName;
+  Stella::StellaIdent paramIdent;
   StellaType paramType;
   StellaType returnType;
   StellaExpression *expression;
@@ -17,7 +17,7 @@ public:
 
   StellaFunction(Stella::StellaIdent ident,
                  std::map<Stella::StellaIdent, StellaType> context);
-  void setParamName(Stella::StellaIdent paramName);
+  void setParamIdent(Stella::StellaIdent paramName);
   void assembleParamType(std::string paramType);
   void assembleReturnType(std::string returnType);
   void setExpression(StellaExpression *expression);

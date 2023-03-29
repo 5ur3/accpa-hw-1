@@ -1,4 +1,5 @@
 #include "../StellaExpression.h"
+#include <iostream>
 
 StellaAbstractionExpression::StellaAbstractionExpression() {
   this->type = STELLA_EXPRESSION_TYPE_ABSTRACTION;
@@ -7,7 +8,13 @@ StellaType StellaAbstractionExpression::getStellaType() {
   return StellaType(this->paramType, this->expression->getStellaType());
 }
 bool StellaAbstractionExpression::isTypingCorrect() {
-  return this->expression->isTypingCorrect();
+  bool isCorrect = this->expression->isTypingCorrect();
+
+  if (!isCorrect) {
+    std::cout << "\tin abstraction" << std::endl;
+  }
+
+  return isCorrect;
 }
 void StellaAbstractionExpression::proxyExpressionTypeToken(
     std::string typeToken) {

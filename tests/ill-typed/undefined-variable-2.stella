@@ -1,7 +1,7 @@
 language core;
 
-fn iszero(n : Nat) -> Bool {
-    return Nat::rec(n, true, fn(i : Nat) {
+fn iszero(m : Nat) -> Bool {
+    return Nat::rec(m, true, fn(i : Nat) {
         return fn(r : Bool) {
             return true;
         };

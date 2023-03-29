@@ -31,7 +31,11 @@ public:
     this->context = context;
   };
   void addContext(Stella::StellaIdent ident, StellaType type) {
-    this->context.insert({ident, type});
+    if (!this->context.count(ident)) {
+      this->context.insert({ident, type});
+    } else {
+      this->context[ident] = type;
+    }
   };
 };
 

@@ -1,12 +1,12 @@
 #include "../StellaExpression.h"
-#include "../StellaType.h"
+#include <iostream>
 
 StellaApplicationExpression::StellaApplicationExpression() {
   this->type = STELLA_EXPRESSION_TYPE_APPLICATION;
 }
 
 StellaType StellaApplicationExpression::getStellaType() {
-  if (!this->isParsed() || !this->isTypingCorrect()) {
+  if (!this->isParsed()) {
     return StellaType();
   }
 
@@ -17,17 +17,29 @@ bool StellaApplicationExpression::isTypingCorrect() {
   if (!this->isParsed()) {
     return false;
   }
+
+  bool isCorrect = true;
   if (!this->expression1->isTypingCorrect() ||
       !this->expression2->isTypingCorrect()) {
-    return false;
+    isCorrect = false;
+  } else if (!expression1->getStellaType().isFunction()) {
+    std::cout << "Type error: applying non function" << std::endl;
+    isCorrect = false;
+  } else if (expression1->getStellaType().getParamType() !=
+             expression2->getStellaType()) {
+    std::cout << "Type error: applying type \""
+              << expression2->getStellaType().type_string << "\""
+              << " to a function expecting \""
+              << expression1->getStellaType().getParamType().type_string << "\""
+              << std::endl;
+    isCorrect = false;
   }
 
-  if (expression1->getStellaType().isFunction()) {
-    return expression1->getStellaType().getParamType() ==
-           expression2->getStellaType();
+  if (!isCorrect) {
+    std::cout << "\tin application" << std::endl;
   }
 
-  return false;
+  return isCorrect;
 }
 
 void StellaApplicationExpression::proxyIdent(Stella::StellaIdent ident) {

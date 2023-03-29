@@ -13,5 +13,11 @@ StellaType StellaVarExpression::getStellaType() {
   return this->context[this->ident];
 }
 bool StellaVarExpression::isTypingCorrect() {
-  return this->context.count(this->ident);
+  bool isCorrect = this->context.count(this->ident);
+
+  if (!isCorrect) {
+    std::cout << "Error: ident \"" + this->ident + "\" is not declared" << std::endl;
+  }
+
+  return isCorrect;
 }
