@@ -7,7 +7,7 @@ StellaType StellaSuccExpression::getStellaType() {
   return StellaType("nat");
 }
 bool StellaSuccExpression::isTypingCorrect() {
-  return this->isParsed() && this->expression->getStellaType() == StellaType("nat");
+  return this->isParsed() && this->expression->isTypingCorrect() && this->expression->getStellaType() == StellaType("nat");
 }
 void StellaSuccExpression::proxyExpressionTypeToken(std::string typeToken) {
     this->expression->proxyExpressionTypeToken(typeToken);
