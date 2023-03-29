@@ -34,6 +34,10 @@ void verifyFunction(StellaFunction *function) {
   bool isCorrect = function->isTypingCorrect();
   std::cout << "! " << function->ident
             << " correctness: " << isCorrect << std::endl;
+
+  if (!isCorrect) {
+    exit(1);
+  }
 }
 
 void onFunction(Stella::StellaIdent ident) {
@@ -189,12 +193,12 @@ void onEnd() {
   if (currentFunction != NULL) {
     verifyFunction(currentFunction);
   }
-
-  std::vector<std::string> functionNames = {"f", "twice", "main"};
-  for (int i = 0; i < functionNames.size(); i++) {
-    auto function = stellaFunctions[functionNames[i]];
-    print_function(function);
-  }
+//
+//  std::vector<std::string> functionNames = {"f", "twice", "main"};
+//  for (int i = 0; i < functionNames.size(); i++) {
+//    auto function = stellaFunctions[functionNames[i]];
+//    print_function(function);
+//  }
 }
 
 namespace Stella {
