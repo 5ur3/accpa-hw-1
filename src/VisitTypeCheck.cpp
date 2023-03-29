@@ -24,11 +24,12 @@
 // When the tree is built, it is enough to call StellaFunction.isTypingCorrect()
 // to check typing correctness of the function (and everything inside)
 //
-// It is advised to read the code in that order:
+// It is advised to read the code and comments in that order:
 // 1) Briefly read the state machine (this file)
 // 2) See StellaType class (./VisitTypeCheckUtils/StellaType)
 // 3) See StellaFunction class (./VisitTypeCheckUtils/StellaFunction)
-// 4) See some StellaExpression implementations (./VisitTypeCheckUtils/StellaExpressions/*)
+// 4) See StellaExpression declaration (./VisitTypeCheckUtils/StellaExpression)
+// 5) See some StellaExpression implementations (./VisitTypeCheckUtils/StellaExpressions/*)
 //
 // My implementation also prints informative type errors
 
