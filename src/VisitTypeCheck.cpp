@@ -10,17 +10,17 @@
 #include <vector>
 
 enum State {
-  awaitingFunctionIdent = 0,
-  parsingFunctionReturnType = 1,
-  awaitingFunctionParamIdent = 2,
-  parsingFunctionParamType = 3,
-  awaitingFunctionExpression = 4,
+  STATE_AWAITING_FUNCTION_IDENT = 0,
+  STATE_PARSING_FUNCTION_RETURN_TYPE = 1,
+  STATE_AWAITING_FUNCTION_PARAM_IDENT = 2,
+  STATE_PARSING_FUNCTION_PARAM_TYPE = 3,
+  STATE_AWAIGING_FUNCTION_EXPRESSION = 4,
 
-  awaitingAbstractionParamIdent = 5,
-  parsingAbstractionParamType = 6,
-  awaitingExpression = 7,
+  STATE_AWAITING_ABSTRACTION_PARAM_IDENT = 5,
+  STATE_PARSING_ABSTRACTION_PARAM_TYPE = 6,
+  STATE_AWAITING_EXPRESSION = 7,
 
-  idle = 100
+  STATE_IDLE = 100
 };
 
 std::map<Stella::StellaIdent, StellaType> globalContext;
@@ -28,7 +28,7 @@ StellaFunction *currentFunction = NULL;
 
 std::map<Stella::StellaIdent, StellaFunction *> stellaFunctions;
 
-State state = idle;
+State state = STATE_IDLE;
 
 void verifyFunction(StellaFunction *function) {
   bool isCorrect = function->isTypingCorrect();
@@ -50,24 +50,24 @@ void onFunction(Stella::StellaIdent ident) {
 
   auto function = new StellaFunction(ident, globalContext);
   stellaFunctions.insert({ident, function});
-  state = awaitingFunctionIdent;
+  state = STATE_AWAITING_FUNCTION_IDENT;
   currentFunction = function;
 }
 
 void onIdent(Stella::StellaIdent ident) {
   switch (state) {
-  case awaitingFunctionIdent: {
-    state = awaitingFunctionParamIdent;
+  case STATE_AWAITING_FUNCTION_IDENT: {
+    state = STATE_AWAITING_FUNCTION_PARAM_IDENT;
     break;
   }
-  case awaitingFunctionParamIdent: {
+  case STATE_AWAITING_FUNCTION_PARAM_IDENT: {
     currentFunction->setParamName(ident);
-    state = parsingFunctionParamType;
+    state = STATE_PARSING_FUNCTION_PARAM_TYPE;
     break;
   }
-  case awaitingAbstractionParamIdent: {
+  case STATE_AWAITING_ABSTRACTION_PARAM_IDENT: {
     currentFunction->proxyIdent(ident);
-    state = parsingAbstractionParamType;
+    state = STATE_PARSING_ABSTRACTION_PARAM_TYPE;
     break;
   }
   default:
@@ -77,15 +77,15 @@ void onIdent(Stella::StellaIdent ident) {
 
 void onType(std::string type) {
   switch (state) {
-  case parsingFunctionParamType: {
+  case STATE_PARSING_FUNCTION_PARAM_TYPE: {
     currentFunction->assembleParamType(type);
     break;
   }
-  case parsingFunctionReturnType: {
+  case STATE_PARSING_FUNCTION_RETURN_TYPE: {
     currentFunction->assembleReturnType(type);
     break;
   }
-  case parsingAbstractionParamType: {
+  case STATE_PARSING_ABSTRACTION_PARAM_TYPE: {
     currentFunction->proxyExpressionTypeToken(type);
     break;
   }
@@ -96,16 +96,16 @@ void onType(std::string type) {
 
 void onTypeParsingEnd() {
   switch (state) {
-  case parsingFunctionParamType: {
-    state = parsingFunctionReturnType;
+  case STATE_PARSING_FUNCTION_PARAM_TYPE: {
+    state = STATE_PARSING_FUNCTION_RETURN_TYPE;
     break;
   }
-  case parsingFunctionReturnType: {
-    state = awaitingFunctionExpression;
+  case STATE_PARSING_FUNCTION_RETURN_TYPE: {
+    state = STATE_AWAIGING_FUNCTION_EXPRESSION;
     break;
   }
-  case parsingAbstractionParamType: {
-    state = awaitingExpression;
+  case STATE_PARSING_ABSTRACTION_PARAM_TYPE: {
+    state = STATE_AWAITING_EXPRESSION;
     break;
   }
   default:
@@ -115,11 +115,11 @@ void onTypeParsingEnd() {
 
 void onExpression(StellaExpression *expression) {
   switch (state) {
-  case awaitingFunctionExpression: {
+  case STATE_AWAIGING_FUNCTION_EXPRESSION: {
     currentFunction->setExpression(expression);
     break;
   }
-  case awaitingExpression: {
+  case STATE_AWAITING_EXPRESSION: {
     currentFunction->proxyExpression(expression);
     break;
   }
@@ -138,27 +138,27 @@ void onVar(Stella::StellaIdent ident) {
 
 void onSucc() {
   onExpression(new StellaSuccExpression());
-  state = awaitingExpression;
+  state = STATE_AWAITING_EXPRESSION;
 }
 
 void onNatRec() {
   onExpression(new StellaNatRecExpression());
-  state = awaitingExpression;
+  state = STATE_AWAITING_EXPRESSION;
 }
 
 void onAbstraction() {
   onExpression(new StellaAbstractionExpression());
-  state = awaitingAbstractionParamIdent;
+  state = STATE_AWAITING_ABSTRACTION_PARAM_IDENT;
 }
 
 void onApplication() {
   onExpression(new StellaApplicationExpression());
-  state = awaitingExpression;
+  state = STATE_AWAITING_EXPRESSION;
 }
 
 void onCondition() {
   onExpression(new StellaConditionExpression());
-  state = awaitingExpression;
+  state = STATE_AWAITING_EXPRESSION;
 }
 
 void print_indent(int level) {
