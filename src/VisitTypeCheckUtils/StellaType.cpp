@@ -3,6 +3,24 @@
 #include <string>
 #include <vector>
 
+std::vector<std::string> split_string(std::string str) {
+  std::vector<std::string> vec;
+  std::string acc = "";
+  for (int i = 0; i < str.size(); i++) {
+    if (str[i] == ' ') {
+      vec.push_back(acc);
+      acc = "";
+    } else {
+      acc += str[i];
+    }
+  }
+  if (acc != "") {
+    vec.push_back(acc);
+  }
+
+  return vec;
+}
+
 void onTypeParsingEnd();
 
 bool StellaType::isCompletedRecursive(
@@ -25,17 +43,7 @@ bool StellaType::isCompletedRecursive(
 }
 
 bool StellaType::isCompleted() {
-  std::vector<std::string> type_vector;
-  std::string acc = "";
-  for (int i = 0; i < this->type_string.size(); i++) {
-    if (this->type_string[i] == ' ') {
-      type_vector.push_back(acc);
-      acc = "";
-    } else {
-      acc += this->type_string[i];
-    }
-  }
-  type_vector.push_back(acc);
+  std::vector<std::string> type_vector = split_string(this->type_string);
 
   std::deque<std::string> tokens;
   tokens.insert(tokens.begin(), type_vector.begin(), type_vector.end());
@@ -43,8 +51,11 @@ bool StellaType::isCompleted() {
 }
 
 StellaType::StellaType(){};
-StellaType::StellaType(std::string type_string) { this->type_string = type_string; };
-StellaType::StellaType(StellaType functionParamType, StellaType functionReturnType) {
+StellaType::StellaType(std::string type_string) {
+  this->type_string = type_string;
+};
+StellaType::StellaType(StellaType functionParamType,
+                       StellaType functionReturnType) {
   this->type_string = "fun " + functionParamType.type_string + " " +
                       functionReturnType.type_string;
 };
@@ -60,6 +71,37 @@ void StellaType::parse(std::string typeToken) {
   if (isCompleted()) {
     onTypeParsingEnd();
   }
+}
+
+StellaType StellaType::getParamType() {
+  std::vector<std::string> type_vector = split_string(this->type_string);
+  if (!this->isCompleted() || type_vector[0] != "fun") {
+    return StellaType();
+  }
+
+  StellaType paramType;
+  for (int i = 1; !paramType.isCompleted(); i++) {
+    paramType.parse(type_vector[i]);
+  }
+  return paramType;
+}
+
+StellaType StellaType::getReturnType() {
+  std::vector<std::string> type_vector = split_string(this->type_string);
+  if (!this->isCompleted() || type_vector[0] != "fun") {
+    return StellaType();
+  }
+
+  int i;
+  StellaType paramType;
+  for (i = 1; !paramType.isCompleted(); i++) {
+    paramType.parse(type_vector[i]);
+  }
+  StellaType returnType;
+  for (int j = i; j < type_vector.size(); j++) {
+    returnType.parse(type_vector[j]);
+  }
+  return returnType;
 }
 
 bool StellaType::operator==(const StellaType &stellaType) const {

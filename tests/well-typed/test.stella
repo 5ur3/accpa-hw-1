@@ -1,15 +1,15 @@
 language core;
 
-fn a(x : fn(Nat) -> Nat) -> (fn(Nat) -> Nat) {
-    return fn (y : Nat) {
-        return 33;
-    };
+fn f(x : Nat) -> Nat {
+    return x;
 }
 
-fn main(f : fn(Nat) -> Nat) -> (fn(fn(Nat) -> Nat) -> (fn(Nat) -> Nat)) {
-    return fn (n : fn(Nat) -> Nat) {
-        return fn (m : Nat) {
-            return 44;
-        };
-    };
+fn twice(f : fn(Nat) -> Nat) -> (fn(Nat) -> Nat) {
+  return fn(x : Nat) {
+    return f(f(x));
+  };
+}
+
+fn main(x : Nat) -> Nat {
+    return twice(f)(x);
 }

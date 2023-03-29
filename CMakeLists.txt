@@ -25,7 +25,9 @@ set (SRCS
   src/VisitTypeCheckUtils/StellaType.cpp
   src/VisitTypeCheckUtils/StellaExpression.h
   src/VisitTypeCheckUtils/StellaExpressions/StellaConstIntExpression.cpp
+  src/VisitTypeCheckUtils/StellaExpressions/StellaVarExpression.cpp
   src/VisitTypeCheckUtils/StellaExpressions/StellaAbstractionExpression.cpp
+  src/VisitTypeCheckUtils/StellaExpressions/StellaApplicationExpression.cpp
   src/VisitTypeCheckUtils/StellaFunction.h
   src/VisitTypeCheckUtils/StellaFunction.cpp
   src/VisitTypeCheck.h

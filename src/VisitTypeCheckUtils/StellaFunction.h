@@ -1,9 +1,10 @@
 #ifndef STELLA_FUNCTION_HEADER
 #define STELLA_FUNCTION_HEADER
 
-#include "StellaType.h"
-#include "StellaExpression.h"
 #include "../Stella/Absyn.H"
+#include "StellaExpression.h"
+#include "StellaType.h"
+#include <map>
 
 class StellaFunction {
 public:
@@ -12,9 +13,10 @@ public:
   StellaType paramType;
   StellaType returnType;
   StellaExpression *expression;
+  std::map<Stella::StellaIdent, StellaType> context;
 
-  StellaFunction();
-  StellaFunction(Stella::StellaIdent ident);
+  StellaFunction(Stella::StellaIdent ident,
+                 std::map<Stella::StellaIdent, StellaType> context);
   void setParamName(Stella::StellaIdent paramName);
   void assembleParamType(std::string paramType);
   void assembleReturnType(std::string returnType);
@@ -22,7 +24,6 @@ public:
   void proxyExpressionTypeToken(std::string typeToken);
   void proxyExpression(StellaExpression *expression);
   void proxyIdent(Stella::StellaIdent ident);
-  void addContext();
   bool isTypingCorrect();
 };
 

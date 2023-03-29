@@ -21,6 +21,8 @@ void StellaAbstractionExpression::proxyExpression(
     StellaExpression *expression) {
   if (this->expression == NULL) {
     this->expression = expression;
+    this->expression->setContext(this->context);
+    this->expression->addContext(this->paramIdent, this->paramType);
   } else {
     this->expression->proxyExpression(expression);
   }
@@ -31,4 +33,8 @@ void StellaAbstractionExpression::proxyIdent(Stella::StellaIdent ident) {
   } else {
     this->expression->proxyIdent(ident);
   }
+}
+bool StellaAbstractionExpression::isParsed() {
+  return this->paramIdent != "" && this->paramType.isCompleted() &&
+         this->expression != NULL && this->expression->isParsed();
 }

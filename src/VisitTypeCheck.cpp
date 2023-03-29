@@ -1,13 +1,13 @@
 #include "VisitTypeCheck.h"
-#include <iostream>
+#include "VisitTypeCheckUtils/StellaExpression.h"
+#include "VisitTypeCheckUtils/StellaFunction.h"
+#include "VisitTypeCheckUtils/StellaType.h"
 #include <deque>
+#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
-#include "VisitTypeCheckUtils/StellaType.h"
-#include "VisitTypeCheckUtils/StellaExpression.h"
-#include "VisitTypeCheckUtils/StellaFunction.h"
 
 enum State {
   awaitingFunctionIdent = 0,
@@ -18,24 +18,31 @@ enum State {
 
   awaitingAbstractionParamIdent = 5,
   parsingAbstractionParamType = 6,
-  awaitingAbstractionExpression = 7,
+  awaitingExpression = 7,
 
   idle = 100
 };
 
+std::map<Stella::StellaIdent, StellaType> globalContext;
+StellaFunction *currentFunction = NULL;
+
 std::map<Stella::StellaIdent, StellaFunction *> stellaFunctions;
-StellaFunction *currentFunction;
 
 State state = idle;
 
-void createStellaFunction(Stella::StellaIdent ident) {
-  if (!stellaFunctions.empty()) {
-    std::cout << "! " << currentFunction->ident
-              << " correctness: " << currentFunction->isTypingCorrect()
-              << std::endl;
+void verifyFunction(StellaFunction *function) {
+  bool isCorrect = function->isTypingCorrect();
+  std::cout << "! " << function->ident
+            << " correctness: " << isCorrect << std::endl;
+}
+
+void onFunction(Stella::StellaIdent ident) {
+  if (currentFunction != NULL) {
+    verifyFunction(currentFunction);
+    globalContext.insert({currentFunction->ident, StellaType(currentFunction->paramType, currentFunction->returnType)});
   }
 
-  auto function = new StellaFunction(ident);
+  auto function = new StellaFunction(ident, globalContext);
   stellaFunctions.insert({ident, function});
   state = awaitingFunctionIdent;
   currentFunction = function;
@@ -43,17 +50,20 @@ void createStellaFunction(Stella::StellaIdent ident) {
 
 void onIdent(Stella::StellaIdent ident) {
   switch (state) {
-  case awaitingFunctionIdent:
+  case awaitingFunctionIdent: {
     state = awaitingFunctionParamIdent;
     break;
-  case awaitingFunctionParamIdent:
+  }
+  case awaitingFunctionParamIdent: {
     currentFunction->setParamName(ident);
     state = parsingFunctionParamType;
     break;
-  case awaitingAbstractionParamIdent:
+  }
+  case awaitingAbstractionParamIdent: {
     currentFunction->proxyIdent(ident);
     state = parsingAbstractionParamType;
     break;
+  }
   default:
     break;
   }
@@ -61,15 +71,18 @@ void onIdent(Stella::StellaIdent ident) {
 
 void onType(std::string type) {
   switch (state) {
-  case parsingFunctionParamType:
+  case parsingFunctionParamType: {
     currentFunction->assembleParamType(type);
     break;
-  case parsingFunctionReturnType:
+  }
+  case parsingFunctionReturnType: {
     currentFunction->assembleReturnType(type);
     break;
-  case parsingAbstractionParamType:
+  }
+  case parsingAbstractionParamType: {
     currentFunction->proxyExpressionTypeToken(type);
     break;
+  }
   default:
     break;
   };
@@ -77,14 +90,18 @@ void onType(std::string type) {
 
 void onTypeParsingEnd() {
   switch (state) {
-  case parsingFunctionParamType:
+  case parsingFunctionParamType: {
     state = parsingFunctionReturnType;
     break;
-  case parsingFunctionReturnType:
+  }
+  case parsingFunctionReturnType: {
     state = awaitingFunctionExpression;
     break;
-  case parsingAbstractionParamType:
-    state = awaitingAbstractionExpression;
+  }
+  case parsingAbstractionParamType: {
+    state = awaitingExpression;
+    break;
+  }
   default:
     break;
   }
@@ -92,15 +109,23 @@ void onTypeParsingEnd() {
 
 void onExpression(StellaExpression *expression) {
   switch (state) {
-  case awaitingFunctionExpression:
+  case awaitingFunctionExpression: {
     currentFunction->setExpression(expression);
     break;
-  case awaitingAbstractionExpression:
+  }
+  case awaitingExpression: {
     currentFunction->proxyExpression(expression);
     break;
+  }
   default:
     break;
   }
+}
+
+void onConstInt() { onExpression(new StellaConstIntExpression()); }
+
+void onVar(Stella::StellaIdent ident) {
+  onExpression(new StellaVarExpression(ident));
 }
 
 void onAbstraction() {
@@ -108,7 +133,10 @@ void onAbstraction() {
   state = awaitingAbstractionParamIdent;
 }
 
-void onConstInt() { onExpression(new StellaConstIntExpression()); }
+void onApplication() {
+  onExpression(new StellaApplicationExpression());
+  state = awaitingExpression;
+}
 
 void print_indent(int level) {
   for (int i = 0; i < level; i++) {
@@ -119,17 +147,33 @@ void print_indent(int level) {
 void print_expression(StellaExpression *expression, int level) {
   print_indent(level);
   switch (expression->type) {
-  case STELLA_EXPRESIION_TYPE_CONST_INT:
+  case STELLA_EXPRESIION_TYPE_CONST_INT: {
     std::cout << "CONST INT" << std::endl;
     break;
-  case STELLA_EXPRESSION_TYPE_ABSTRACTION:
+  }
+  case STELLA_EXPRESSION_TYPE_ABSTRACTION: {
     StellaAbstractionExpression *expr =
         (StellaAbstractionExpression *)expression;
     std::cout << "ABSTRACTION(" << expr->paramIdent << ": "
               << expr->paramType.type_string
-              << "): " << expr->expression->getStellaType().type_string << std::endl;
+              << "): " << expr->expression->getStellaType().type_string
+              << std::endl;
     print_expression(expr->expression, level + 1);
     break;
+  }
+  case STELLA_EXPRESSION_TYPE_APPLICATION: {
+    std::cout << "APPLICATION" << std::endl;
+    StellaApplicationExpression *expr =
+        (StellaApplicationExpression *)expression;
+    print_expression(expr->expression1, level + 1);
+    print_expression(expr->expression2, level + 1);
+    break;
+  }
+  case STELLA_EXPRESIION_TYPE_VAR: {
+    StellaVarExpression *expr = (StellaVarExpression *)expression;
+    std::cout << "VAR " << expr->ident << std::endl;
+    break;
+  }
   }
 }
 
@@ -142,16 +186,14 @@ void print_function(StellaFunction *function) {
 }
 
 void onEnd() {
-  std::vector<std::string> functionNames = {"a", "main"};
+  if (currentFunction != NULL) {
+    verifyFunction(currentFunction);
+  }
+
+  std::vector<std::string> functionNames = {"f", "twice", "main"};
   for (int i = 0; i < functionNames.size(); i++) {
     auto function = stellaFunctions[functionNames[i]];
     print_function(function);
-  }
-
-  if (!stellaFunctions.empty()) {
-    std::cout << "! " << currentFunction->ident
-              << " correctness: " << currentFunction->isTypingCorrect()
-              << std::endl;
   }
 }
 
@@ -208,7 +250,7 @@ void VisitTypeCheck::visitAnExtension(AnExtension *an_extension) {
 void VisitTypeCheck::visitDeclFun(DeclFun *decl_fun) {
   /* Code For DeclFun Goes Here */
 
-  createStellaFunction(decl_fun->stellaident_);
+  onFunction(decl_fun->stellaident_);
 
   if (decl_fun->listannotation_)
     decl_fun->listannotation_->accept(this);
@@ -445,6 +487,7 @@ void VisitTypeCheck::visitLogicAnd(LogicAnd *logic_and) {
 
 void VisitTypeCheck::visitApplication(Application *application) {
   /* Code For Application Goes Here */
+  onApplication();
   if (application->expr_)
     application->expr_->accept(this);
   if (application->listexpr_)
@@ -578,6 +621,7 @@ void VisitTypeCheck::visitConstInt(ConstInt *const_int) {
 
 void VisitTypeCheck::visitVar(Var *var) {
   /* Code For Var Goes Here */
+  onVar(var->stellaident_);
 
   visitStellaIdent(var->stellaident_);
 }
