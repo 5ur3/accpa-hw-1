@@ -6,17 +6,11 @@ StellaApplicationExpression::StellaApplicationExpression() {
 }
 
 StellaType StellaApplicationExpression::getStellaType() {
-  if (!this->isParsed()) {
+  if (!this->isParsed() || !this->isTypingCorrect()) {
     return StellaType();
   }
 
-  if (expression1->type == STELLA_EXPRESSION_TYPE_ABSTRACTION ||
-      expression1->type == STELLA_EXPRESIION_TYPE_VAR ||
-      expression1->type == STELLA_EXPRESSION_TYPE_APPLICATION) {
-    return expression1->getStellaType().getReturnType();
-  }
-
-  return StellaType();
+  return expression1->getStellaType().getReturnType();
 }
 
 bool StellaApplicationExpression::isTypingCorrect() {
@@ -28,9 +22,7 @@ bool StellaApplicationExpression::isTypingCorrect() {
     return false;
   }
 
-  if (expression1->type == STELLA_EXPRESSION_TYPE_ABSTRACTION ||
-      expression1->type == STELLA_EXPRESIION_TYPE_VAR ||
-      expression1->type == STELLA_EXPRESSION_TYPE_APPLICATION) {
+  if (expression1->getStellaType().isFunction()) {
     return expression1->getStellaType().getParamType() ==
            expression2->getStellaType();
   }

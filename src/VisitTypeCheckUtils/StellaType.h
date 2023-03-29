@@ -17,6 +17,8 @@ public:
   bool isCompleted();
   void parse(std::string typeToken);
   bool operator==(const StellaType &stellaType) const;
+  bool operator!=(const StellaType &stellaType) const;
+  bool isFunction();
   StellaType getParamType();
   StellaType getReturnType();
 };

@@ -3,7 +3,7 @@
 #include <iostream>
 
 StellaVarExpression::StellaVarExpression(Stella::StellaIdent ident) {
-  this->type = STELLA_EXPRESIION_TYPE_VAR;
+  this->type = STELLA_EXPRESSION_TYPE_VAR;
   this->ident = ident;
 }
 StellaType StellaVarExpression::getStellaType() {

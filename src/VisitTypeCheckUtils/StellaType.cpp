@@ -35,6 +35,9 @@ bool StellaType::isCompletedRecursive(
   if (token == "nat") {
     return true;
   }
+  if (token == "bool") {
+    return true;
+  }
   if (token == "fun") {
     return isCompletedRecursive(remainingTokens) &&
            isCompletedRecursive(remainingTokens);
@@ -73,6 +76,11 @@ void StellaType::parse(std::string typeToken) {
   }
 }
 
+bool StellaType::isFunction() {
+  std::vector<std::string> type_vector = split_string(this->type_string);
+  return this->isCompleted() && type_vector[0] == "fun";
+}
+
 StellaType StellaType::getParamType() {
   std::vector<std::string> type_vector = split_string(this->type_string);
   if (!this->isCompleted() || type_vector[0] != "fun") {
@@ -106,4 +114,8 @@ StellaType StellaType::getReturnType() {
 
 bool StellaType::operator==(const StellaType &stellaType) const {
   return (this->type_string == stellaType.type_string);
+}
+
+bool StellaType::operator!=(const StellaType &stellaType) const {
+  return (this->type_string != stellaType.type_string);
 }

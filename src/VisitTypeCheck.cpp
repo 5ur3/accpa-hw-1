@@ -32,8 +32,8 @@ State state = idle;
 
 void verifyFunction(StellaFunction *function) {
   bool isCorrect = function->isTypingCorrect();
-  std::cout << "! " << function->ident
-            << " correctness: " << isCorrect << std::endl;
+  std::cout << "! " << function->ident << " correctness: " << isCorrect
+            << std::endl;
 
   if (!isCorrect) {
     exit(1);
@@ -43,7 +43,9 @@ void verifyFunction(StellaFunction *function) {
 void onFunction(Stella::StellaIdent ident) {
   if (currentFunction != NULL) {
     verifyFunction(currentFunction);
-    globalContext.insert({currentFunction->ident, StellaType(currentFunction->paramType, currentFunction->returnType)});
+    globalContext.insert(
+        {currentFunction->ident,
+         StellaType(currentFunction->paramType, currentFunction->returnType)});
   }
 
   auto function = new StellaFunction(ident, globalContext);
@@ -128,8 +130,20 @@ void onExpression(StellaExpression *expression) {
 
 void onConstInt() { onExpression(new StellaConstIntExpression()); }
 
+void onConstBool() { onExpression(new StellaConstBoolExpression()); }
+
 void onVar(Stella::StellaIdent ident) {
   onExpression(new StellaVarExpression(ident));
+}
+
+void onSucc() {
+  onExpression(new StellaSuccExpression());
+  state = awaitingExpression;
+}
+
+void onNatRec() {
+  onExpression(new StellaNatRecExpression());
+  state = awaitingExpression;
 }
 
 void onAbstraction() {
@@ -142,6 +156,11 @@ void onApplication() {
   state = awaitingExpression;
 }
 
+void onCondition() {
+  onExpression(new StellaConditionExpression());
+  state = awaitingExpression;
+}
+
 void print_indent(int level) {
   for (int i = 0; i < level; i++) {
     std::cout << "\t";
@@ -151,8 +170,12 @@ void print_indent(int level) {
 void print_expression(StellaExpression *expression, int level) {
   print_indent(level);
   switch (expression->type) {
-  case STELLA_EXPRESIION_TYPE_CONST_INT: {
+  case STELLA_EXPRESSION_TYPE_CONST_INT: {
     std::cout << "CONST INT" << std::endl;
+    break;
+  }
+  case STELLA_EXPRESSION_TYPE_CONST_BOOL: {
+    std::cout << "CONST BOOL" << std::endl;
     break;
   }
   case STELLA_EXPRESSION_TYPE_ABSTRACTION: {
@@ -173,9 +196,31 @@ void print_expression(StellaExpression *expression, int level) {
     print_expression(expr->expression2, level + 1);
     break;
   }
-  case STELLA_EXPRESIION_TYPE_VAR: {
+  case STELLA_EXPRESSION_TYPE_CONDITION: {
+    std::cout << "CONDITION" << std::endl;
+    StellaConditionExpression *expr = (StellaConditionExpression *)expression;
+    print_expression(expr->condition, level + 1);
+    print_expression(expr->expression1, level + 1);
+    print_expression(expr->expression2, level + 1);
+    break;
+  }
+  case STELLA_EXPRESSION_TYPE_VAR: {
     StellaVarExpression *expr = (StellaVarExpression *)expression;
     std::cout << "VAR " << expr->ident << std::endl;
+    break;
+  }
+  case STELLA_EXPRESSION_TYPE_NAT_REC: {
+    std::cout << "NAT::REC" << std::endl;
+    StellaNatRecExpression *expr = (StellaNatRecExpression *)expression;
+    print_expression(expr->n, level + 1);
+    print_expression(expr->z, level + 1);
+    print_expression(expr->s, level + 1);
+    break;
+  }
+  case STELLA_EXPRESSION_TYPE_SUCC: {
+    std::cout << "SUCC" << std::endl;
+    StellaSuccExpression *expr = (StellaSuccExpression *)expression;
+    print_expression(expr->expression, level + 1);
     break;
   }
   }
@@ -193,12 +238,6 @@ void onEnd() {
   if (currentFunction != NULL) {
     verifyFunction(currentFunction);
   }
-//
-//  std::vector<std::string> functionNames = {"f", "twice", "main"};
-//  for (int i = 0; i < functionNames.size(); i++) {
-//    auto function = stellaFunctions[functionNames[i]];
-//    print_function(function);
-//  }
 }
 
 namespace Stella {
@@ -322,7 +361,7 @@ void VisitTypeCheck::visitSomeThrowType(SomeThrowType *some_throw_type) {
 }
 
 void VisitTypeCheck::visitIf(If *if_) {
-  /* Code For If Goes Here */
+  onCondition();
 
   if (if_->expr_1)
     if_->expr_1->accept(this);
@@ -529,7 +568,7 @@ void VisitTypeCheck::visitTail(Tail *tail) {
 }
 
 void VisitTypeCheck::visitSucc(Succ *succ) {
-  /* Code For Succ Goes Here */
+  onSucc();
 
   if (succ->expr_)
     succ->expr_->accept(this);
@@ -564,7 +603,7 @@ void VisitTypeCheck::visitFix(Fix *fix) {
 }
 
 void VisitTypeCheck::visitNatRec(NatRec *nat_rec) {
-  /* Code For NatRec Goes Here */
+  onNatRec();
 
   if (nat_rec->expr_1)
     nat_rec->expr_1->accept(this);
@@ -608,16 +647,11 @@ void VisitTypeCheck::visitDotTuple(DotTuple *dot_tuple) {
   visitInteger(dot_tuple->integer_);
 }
 
-void VisitTypeCheck::visitConstTrue(ConstTrue *const_true) {
-  /* Code For ConstTrue Goes Here */
-}
+void VisitTypeCheck::visitConstTrue(ConstTrue *const_true) { onConstBool(); }
 
-void VisitTypeCheck::visitConstFalse(ConstFalse *const_false) {
-  /* Code For ConstFalse Goes Here */
-}
+void VisitTypeCheck::visitConstFalse(ConstFalse *const_false) { onConstBool(); }
 
 void VisitTypeCheck::visitConstInt(ConstInt *const_int) {
-  /* Code For ConstInt Goes Here */
   onConstInt();
 
   visitInteger(const_int->integer_);
