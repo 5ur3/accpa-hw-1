@@ -5,10 +5,6 @@ StellaNatRecExpression::StellaNatRecExpression() {
   this->type = STELLA_EXPRESSION_TYPE_NAT_REC;
 }
 StellaType StellaNatRecExpression::getStellaType() {
-  if (!this->isParsed()) {
-    return StellaType();
-  }
-
   return z->getStellaType();
 }
 bool StellaNatRecExpression::isTypingCorrect() {

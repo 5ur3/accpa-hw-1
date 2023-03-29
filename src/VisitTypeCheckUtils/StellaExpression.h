@@ -16,17 +16,36 @@ enum StellaExpressionType {
   STELLA_EXPRESSION_TYPE_CONDITION = 7
 };
 
+// Representation of any stella expression
 class StellaExpression {
 public:
   StellaExpressionType type;
+
+  // Context gets read only in StellaVarExpression to determine it's type.
+  // In other StellaExpression implementations it is just passed down the tree.
+  //
+  // Functions and abstractions not only pass the context down the tree,
+  // they also add its params to the context of encosed expression
   std::map<Stella::StellaIdent, StellaType> context;
 
+  // These methods have to be overriden for every StellaExpression
+  // implementation
   virtual StellaType getStellaType() = 0;
   virtual bool isTypingCorrect() = 0;
+
+  // Some leaf StellaExpression implementation, such as
+  // StellaConstIntExpression, have no inner expression, no ident and no
+  // user-defined type declarations.
+  //
+  // For those expressions, default
+  // implementations of methods below are written here.
   virtual void proxyIdent(Stella::StellaIdent ident){};
   virtual void proxyExpressionTypeToken(std::string typeToken){};
   virtual void proxyExpression(StellaExpression *expression){};
   virtual bool isParsed() { return true; };
+
+  // Context setter methods are common among all StellaExpression
+  // implementations
   void setContext(std::map<Stella::StellaIdent, StellaType> context) {
     this->context = context;
   };
@@ -39,6 +58,7 @@ public:
   };
 };
 
+// All StellaExpression declarations are written below
 class StellaConstIntExpression : public StellaExpression {
 public:
   StellaConstIntExpression();
@@ -56,6 +76,7 @@ public:
 class StellaVarExpression : public StellaExpression {
 public:
   Stella::StellaIdent ident;
+
   StellaVarExpression(Stella::StellaIdent ident);
   StellaType getStellaType();
   bool isTypingCorrect();
@@ -66,6 +87,7 @@ public:
   StellaExpression *expression = NULL;
   StellaSuccExpression();
   StellaType getStellaType();
+
   bool isTypingCorrect();
   void proxyExpressionTypeToken(std::string typeToken);
   void proxyExpression(StellaExpression *expression);
@@ -78,6 +100,7 @@ public:
   StellaExpression *n = NULL;
   StellaExpression *z = NULL;
   StellaExpression *s = NULL;
+
   StellaNatRecExpression();
   StellaType getStellaType();
   bool isTypingCorrect();
@@ -92,6 +115,7 @@ public:
   Stella::StellaIdent paramIdent = "";
   StellaType paramType;
   StellaExpression *expression = NULL;
+
   StellaAbstractionExpression();
   StellaType getStellaType();
   bool isTypingCorrect();

@@ -6,10 +6,6 @@ StellaApplicationExpression::StellaApplicationExpression() {
 }
 
 StellaType StellaApplicationExpression::getStellaType() {
-  if (!this->isParsed()) {
-    return StellaType();
-  }
-
   return expression1->getStellaType().getReturnType();
 }
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+// helper method. Splits string into vector of strings by a whitespace
 std::vector<std::string> split_string(std::string str) {
   std::vector<std::string> vec;
   std::string acc = "";
@@ -21,8 +22,10 @@ std::vector<std::string> split_string(std::string str) {
   return vec;
 }
 
+// Forward-declaration of one of state machine controlling methods from VisitTypeCheck.cpp
 void onTypeParsingEnd();
 
+// Documentation of the class methods is in StellaType.h
 bool StellaType::isCompletedRecursive(
     std::deque<std::string> &remainingTokens) {
   if (remainingTokens.empty()) {

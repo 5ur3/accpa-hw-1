@@ -1,6 +1,7 @@
 #include "StellaFunction.h"
 #include <iostream>
 
+// Documentation of the class methods is in StellaFunction.h
 StellaFunction::StellaFunction(
     Stella::StellaIdent ident,
     std::map<Stella::StellaIdent, StellaType> context) {
@@ -10,11 +11,11 @@ StellaFunction::StellaFunction(
 void StellaFunction::setParamIdent(Stella::StellaIdent paramIdent) {
   this->paramIdent = paramIdent;
 }
-void StellaFunction::assembleParamType(std::string paramType) {
-  this->paramType.parse(paramType);
+void StellaFunction::assembleParamType(std::string paramTypeToken) {
+  this->paramType.parse(paramTypeToken);
 }
-void StellaFunction::assembleReturnType(std::string returnType) {
-  this->returnType.parse(returnType);
+void StellaFunction::assembleReturnType(std::string returnTypeToken) {
+  this->returnType.parse(returnTypeToken);
 }
 void StellaFunction::setExpression(StellaExpression *expression) {
   this->expression = expression;

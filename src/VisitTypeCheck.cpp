@@ -9,6 +9,29 @@
 #include <utility>
 #include <vector>
 
+// My implementation of type checking program consists of 2 main parts.
+//
+// The first part is the state machine (this file)
+// It is used to keep track of what kind of token is expected to come next
+// For example, when Visitor encounters Ident, the state is either
+//    "STATE_AWAITING_FUNCTION_IDENT",
+//    "STATE_AWAITING_FUNCTION_PARAM_IDENT" or
+//    "STATE_AWAITING_ABSTRACTION_PARAM_IDENT"
+//
+// The second part of my type checking implementation is the construction of
+// typing trees. For example, when Visitor encounters a Function Declaration, it
+// starts to construct a new typing tree with the StellaFunction at the root.
+// When the tree is built, it is enough to call StellaFunction.isTypingCorrect()
+// to check typing correctness of the function (and everything inside)
+//
+// It is advised to read the code in that order:
+// 1) Briefly read the state machine (this file)
+// 2) See StellaType class (./VisitTypeCheckUtils/StellaType)
+// 3) See StellaFunction class (./VisitTypeCheckUtils/StellaFunction)
+// 4) See some StellaExpression implementations (./VisitTypeCheckUtils/StellaExpressions/*)
+//
+// My implementation also prints informative type errors
+
 enum State {
   STATE_AWAITING_FUNCTION_IDENT = 0,
   STATE_PARSING_FUNCTION_RETURN_TYPE = 1,
@@ -25,11 +48,11 @@ enum State {
 
 State state = STATE_IDLE;
 
-// Global context contains function signatures
+// Global context contains function type signatures
 std::map<Stella::StellaIdent, StellaType> globalContext;
 StellaFunction *currentFunction = NULL;
 
-// This is used for debugging only
+// stellaFunctions map is used for debugging only
 std::map<Stella::StellaIdent, StellaFunction *> stellaFunctions;
 
 void verifyFunction(StellaFunction *function) {
@@ -40,7 +63,7 @@ void verifyFunction(StellaFunction *function) {
   }
 }
 
-// Functions below are called directly from template visitor below
+// Functions below are called directly from the template visitor
 // These functions control the program state and build typing trees
 void onFunction(Stella::StellaIdent ident) {
   if (currentFunction != NULL) {
@@ -163,7 +186,8 @@ void onCondition() {
   state = STATE_AWAITING_EXPRESSION;
 }
 
-// Functions used to print function and expression signatures
+// Functions below are used for debugging only. They print function and
+// expression type signatures
 void print_indent(int level) {
   for (int i = 0; i < level; i++) {
     std::cout << "\t";
@@ -242,8 +266,13 @@ void onEnd() {
   if (currentFunction != NULL) {
     verifyFunction(currentFunction);
   }
+
+  // Try this if you want to see what typing tree looks like:
+  // print_function(stellaFunctions["main"]);
 }
 
+// Code below was not changed except for calling state-machine controlling
+// methods above, such as onFunction()
 namespace Stella {
 void VisitTypeCheck::visitProgram(Program *t) {}               // abstract class
 void VisitTypeCheck::visitLanguageDecl(LanguageDecl *t) {}     // abstract class

@@ -5,10 +5,6 @@ StellaConditionExpression::StellaConditionExpression() {
   this->type = STELLA_EXPRESSION_TYPE_CONDITION;
 }
 StellaType StellaConditionExpression::getStellaType() {
-  if (!this->isParsed()) {
-    return StellaType();
-  }
-
   return expression1->getStellaType();
 }
 bool StellaConditionExpression::isTypingCorrect() {
